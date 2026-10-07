@@ -1,0 +1,46 @@
+.timer__value {
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  transition: color 300ms;
+}
+
+/* La barra recorre todo el ancho bajo la navegación */
+.timer__track {
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 2px;
+  background: var(--line);
+}
+
+.timer__bar {
+  display: block;
+  height: 100%;
+  background: var(--text);
+  transform-origin: left center;
+  transition: transform 1s linear, background-color 300ms;
+}
+
+.timer--urgent .timer__value {
+  color: var(--accent);
+  animation: timer-pulse 1s ease-in-out infinite;
+}
+
+.timer--urgent .timer__bar {
+  background: var(--accent);
+}
+
+@keyframes timer-pulse {
+  50% { opacity: 0.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .timer__bar {
+    transition: none;
+  }
+
+  .timer--urgent .timer__value {
+    animation: none;
+  }
+}

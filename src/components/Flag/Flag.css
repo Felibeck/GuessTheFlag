@@ -1,0 +1,24 @@
+.flag {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+}
+
+.flag__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: pan-y;
+  cursor: crosshair;
+}
+
+.flag__canvas[hidden] {
+  display: none;
+}
+
+.flag__fallback {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

@@ -11,5 +11,5 @@ export const getAllFlags = async() =>
 {
     const response = await api.get("/flag/images");
 
-    return response.data.results;
+    return response.data.data;
 }

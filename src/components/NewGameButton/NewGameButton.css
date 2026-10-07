@@ -1,0 +1,76 @@
+.new-game {
+  --inset: 0px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60px;
+  padding: 0 34px;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 160ms, filter 200ms;
+}
+
+.new-game__label {
+  position: relative;
+}
+
+/* Las esquinas viven fuera del botón y se acercan al apuntar */
+.new-game__corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 0 solid var(--accent);
+  transition: transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 320ms;
+  opacity: 0.6;
+}
+
+.new-game__corner--tl { top: -10px; left: -10px; border-top-width: 2px; border-left-width: 2px; border-top-left-radius: 8px; }
+.new-game__corner--tr { top: -10px; right: -10px; border-top-width: 2px; border-right-width: 2px; border-top-right-radius: 8px; }
+.new-game__corner--bl { bottom: -10px; left: -10px; border-bottom-width: 2px; border-left-width: 2px; border-bottom-left-radius: 8px; }
+.new-game__corner--br { bottom: -10px; right: -10px; border-bottom-width: 2px; border-right-width: 2px; border-bottom-right-radius: 8px; }
+
+.new-game:hover:not(:disabled) .new-game__corner,
+.new-game:focus-visible .new-game__corner {
+  opacity: 1;
+}
+
+.new-game:hover:not(:disabled) .new-game__corner--tl,
+.new-game:focus-visible .new-game__corner--tl { transform: translate(5px, 5px); }
+.new-game:hover:not(:disabled) .new-game__corner--tr,
+.new-game:focus-visible .new-game__corner--tr { transform: translate(-5px, 5px); }
+.new-game:hover:not(:disabled) .new-game__corner--bl,
+.new-game:focus-visible .new-game__corner--bl { transform: translate(5px, -5px); }
+.new-game:hover:not(:disabled) .new-game__corner--br,
+.new-game:focus-visible .new-game__corner--br { transform: translate(-5px, -5px); }
+
+.new-game:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.new-game:focus-visible {
+  outline: none;
+}
+
+.new-game:disabled {
+  color: var(--muted);
+  background: var(--surface-2);
+  cursor: progress;
+}
+
+.new-game:disabled .new-game__corner {
+  border-color: var(--line-strong);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .new-game,
+  .new-game__corner {
+    transition: none;
+  }
+}

@@ -1,0 +1,70 @@
+.score {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.score__main {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.score__value {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: clamp(2.6rem, 6vw, 4rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.score__unit {
+  color: var(--muted);
+}
+
+.score__stats {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* "+10" / "−1" que sube y se desvanece junto al número */
+.score__float {
+  position: absolute;
+  left: 100%;
+  top: -0.2em;
+  margin-left: 8px;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 1.25rem;
+  pointer-events: none;
+  animation: score-float 900ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.score__float--up {
+  color: var(--accent);
+}
+
+.score__float--down {
+  color: var(--muted);
+}
+
+@keyframes score-float {
+  0% { opacity: 0; transform: translateY(10px) scale(0.9); }
+  20% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-26px) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .score__float {
+    animation: score-fade 900ms linear forwards;
+  }
+
+  @keyframes score-fade {
+    0%, 60% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+}

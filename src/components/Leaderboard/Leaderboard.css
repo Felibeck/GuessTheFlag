@@ -1,0 +1,70 @@
+.ranking {
+  width: 100%;
+}
+
+.ranking__title {
+  margin: 0 0 16px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.ranking__mode {
+  margin-left: 10px;
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+
+.ranking__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.ranking__row {
+  display: grid;
+  grid-template-columns: 2.5ch minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 16px;
+  padding: 14px 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.ranking__place,
+.ranking__score {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.ranking__place {
+  color: var(--muted);
+}
+
+.ranking__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.ranking__score {
+  color: var(--text);
+}
+
+/* El primer puesto es lo único que lleva el acento */
+.ranking__row:first-child .ranking__place,
+.ranking__row:first-child .ranking__score {
+  color: var(--accent);
+}
+
+.ranking__empty {
+  margin: 0;
+  padding: 20px 0;
+  max-width: 40ch;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+}
