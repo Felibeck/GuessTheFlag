@@ -1,3 +1,4 @@
+/* Número del reloj. tabular-nums: todas las cifras ocupan lo mismo y no "baila" al cambiar */
 .timer__value {
   font-family: var(--mono);
   font-size: 1.05rem;
@@ -14,6 +15,7 @@
   background: var(--line);
 }
 
+/* Se encoge con transform: scaleX (ver Timer/index.tsx). transform-origin: la barra se recoge hacia la izquierda */
 .timer__bar {
   display: block;
   height: 100%;
@@ -22,6 +24,7 @@
   transition: transform 1s linear, background-color 300ms;
 }
 
+/* Últimos segundos: el reloj y la barra pasan al color de acento y el número parpadea */
 .timer--urgent .timer__value {
   color: var(--accent);
   animation: timer-pulse 1s ease-in-out infinite;

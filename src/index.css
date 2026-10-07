@@ -1,13 +1,17 @@
 /* GuessTheFlag: sala oscura y neutra; el color lo ponen las banderas */
+/* Variables CSS: se usan en todos los archivos con var(--nombre).
+   Cambiar un valor aquí lo cambia en toda la app. */
 :root {
   --bg: #0c0d10;
   --surface: #15171c;
   --surface-2: #1c1f26;
   --text: #eceef2;
   --muted: #8a8f9a;
+  /* Líneas finas: blanco casi transparente, para que valgan sobre cualquier fondo */
   --line: rgb(255 255 255 / 0.08);
   --line-strong: rgb(255 255 255 / 0.14);
   --accent: #e9d37b;
+  /* Color del texto que va SOBRE el acento (casi negro, para que se lea) */
   --accent-ink: #17140a;
 
   --sans: 'Geist', system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -23,6 +27,7 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* box-sizing: border-box hace que width incluya el padding y el borde, mucho más fácil de calcular */
 *,
 *::before,
 *::after {
@@ -54,6 +59,7 @@ button {
   background: var(--accent);
 }
 
+/* "Solo para lectores de pantalla": oculta algo a la vista pero lo deja accesible */
 .sr-only {
   position: absolute;
   width: 1px;

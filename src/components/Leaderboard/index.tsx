@@ -1,6 +1,13 @@
+/**
+ * <Leaderboard>: tabla de mejores puntuaciones.
+ * Solo pinta lo que recibe; filtrar por dificultad lo hace App (entriesFor)
+ * y guardar en localStorage lo hace GameProvider (saveScore).
+ */
+
 import type { Difficulty } from '../../Context/GameContext'
 import './Leaderboard.css'
 
+/** Una puntuación guardada */
 export interface LeaderboardEntry {
     name: string
     score: number
@@ -16,6 +23,7 @@ interface LeaderboardProps {
 
 const Leaderboard = ({ entries, mode }: LeaderboardProps) =>
 {
+    // Copia (con [...]) antes de ordenar: sort() modifica el array, y las props no se deben modificar
     const sorted = [...entries].sort((a, b) => b.score - a.score)
 
     return (
@@ -29,6 +37,7 @@ const Leaderboard = ({ entries, mode }: LeaderboardProps) =>
                 <p className="ranking__empty">Todavía no hay partidas guardadas. Juega una y pon tu nombre aquí.</p>
             ) : (
                 <ol className="ranking__list">
+                    {/* La posición es i + 1 porque ya están ordenadas de mayor a menor */}
                     {sorted.map((entry, i) => (
                         <li key={`${entry.name}-${i}`} className="ranking__row">
                             <span className="ranking__place">{i + 1}</span>

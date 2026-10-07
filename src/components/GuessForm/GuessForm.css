@@ -1,3 +1,4 @@
+/* Contenedor del formulario de respuesta (modo texto y modo opciones) */
 .guess {
   display: flex;
   flex-direction: column;

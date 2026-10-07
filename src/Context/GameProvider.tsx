@@ -1,3 +1,18 @@
+/**
+ * El "cerebro" del juego. Guarda todo el estado (banderas, puntos, dificultad,
+ * ranking...) y las acciones que lo cambian (adivinar, pasar, empezar...).
+ * Lo publica a través de GameContext para que cualquier componente lo use con useGame().
+ *
+ * Ciclo de una partida:
+ *   loading ──(API responde)──▶ ready ──startGame()──▶ playing ──endGame()──▶ finished
+ *                  │                                     ▲                       │
+ *                  └──(falla)──▶ error                   └──── startGame() ──────┘
+ *   goHome() vuelve de finished a ready (para cambiar la dificultad).
+ *
+ * Persistencia: el ranking y la última dificultad se guardan en localStorage,
+ * siempre dentro de try/catch porque el navegador puede bloquearlo (modo privado).
+ */
+
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import type { LeaderboardEntry } from '../components/Leaderboard'
 import { getAllFlags } from '../services/flagApi'
@@ -12,10 +27,13 @@ import GameContext, {
     type GuessResult,
 } from './GameContext'
 
+/** Claves con las que se guardan los datos en localStorage */
 const STORAGE_KEY = 'guesstheflag:leaderboard'
 const DIFFICULTY_KEY = 'guesstheflag:difficulty'
+/** Puntuaciones que se conservan por cada dificultad */
 const MAX_ENTRIES = 10
 
+/** Lee el ranking guardado; si no hay nada o está roto, empieza vacío */
 const loadLeaderboard = (): LeaderboardEntry[] =>
 {
     try {
@@ -26,6 +44,7 @@ const loadLeaderboard = (): LeaderboardEntry[] =>
     }
 }
 
+/** Lee la última dificultad; si no hay o no es válida, 'medio' */
 const loadDifficulty = (): Difficulty =>
 {
     try {
@@ -36,26 +55,39 @@ const loadDifficulty = (): Difficulty =>
     }
 }
 
+/**
+ * Envuelve la app (ver App.tsx). Los datos y acciones del final se publican en el
+ * contexto; `children` es todo lo que va dentro.
+ */
 const GameProvider = ({ children }: { children: ReactNode }) =>
 {
+    // Estado. Pasar una función a useState (loadDifficulty, loadLeaderboard) la ejecuta
+    // solo la primera vez, en lugar de leer localStorage en cada render.
+    /** Todas las banderas disponibles (se van quitando las que no cargan) */
     const [flagList, setFlagList] = useState<FlagData[]>([])
     const [difficulty, setDifficultyState] = useState<Difficulty>(loadDifficulty)
+    /** La bandera que se está adivinando */
     const [currentFlag, setCurrentFlag] = useState<FlagData | null>(null)
+    /** Opciones a elegir (solo modo fácil) */
     const [choices, setChoices] = useState<string[]>([])
     const [score, setScore] = useState(0)
     const [hits, setHits] = useState(0)
     const [misses, setMisses] = useState(0)
     const [status, setStatus] = useState<GameStatus>('loading')
+    /** Último intento: de aquí salen el mensaje, el "+10"/"−1" y el temblor */
     const [lastGuess, setLastGuess] = useState<GuessResult | null>(null)
+    /** Identifica la partida en curso; al cambiar se reinicia el Timer (ver Game en App.tsx) */
     const [gameId, setGameId] = useState(0)
     const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>(loadLeaderboard)
 
+    // Al montar: pide las banderas a la API una sola vez ([] = sin dependencias)
     useEffect(() =>
     {
         const loadFlags = async () =>
         {
             try {
                 const data: FlagData[] = await getAllFlags()
+                // Se descartan entradas sin nombre o sin imagen
                 setFlagList(data.filter(f => f.name && f.flag))
                 setStatus('ready')
             } catch {
@@ -66,7 +98,14 @@ const GameProvider = ({ children }: { children: ReactNode }) =>
         loadFlags()
     }, [])
 
-    /** Pasa a una bandera nueva (y prepara sus opciones si el modo es fácil) */
+    // Las acciones van en useCallback para que conserven la misma referencia entre
+    // renders mientras no cambien sus dependencias (las del array del final).
+
+    /**
+     * Pasa a una bandera nueva (distinta de `previous`) y, si el modo es fácil,
+     * prepara sus 4 opciones. Recibe la lista como parámetro porque a veces se
+     * llama justo después de modificarla (replaceFlag) y el estado aún no se actualizó.
+     */
     const nextFlag = useCallback((list: FlagData[], previous: FlagData | null) =>
     {
         const next = pickRandom(list, previous)
@@ -74,6 +113,7 @@ const GameProvider = ({ children }: { children: ReactNode }) =>
         setChoices(next && DIFFICULTIES[difficulty].answer === 'choices' ? makeChoices(list, next) : [])
     }, [difficulty])
 
+    /** Cambia el modo y lo recuerda para la próxima visita */
     const setDifficulty = useCallback((value: Difficulty) =>
     {
         setDifficultyState(value)
@@ -84,8 +124,10 @@ const GameProvider = ({ children }: { children: ReactNode }) =>
         }
     }, [])
 
+    /** Pone el marcador a cero, elige bandera y arranca el reloj (gameId nuevo = Timer nuevo) */
     const startGame = useCallback(() =>
     {
+        // Se reinicia todo lo de la partida anterior
         setScore(0)
         setHits(0)
         setMisses(0)
@@ -95,10 +137,14 @@ const GameProvider = ({ children }: { children: ReactNode }) =>
         setStatus('playing')
     }, [flagList, currentFlag, nextFlag])
 
+    /** Comprueba una respuesta: acierto suma y cambia de bandera; fallo resta y se queda */
     const guess = useCallback((answer: string) =>
     {
+        // Defensa: ignorar respuestas fuera de partida (p. ej. justo al acabarse el tiempo)
         if (status !== 'playing' || !currentFlag) return
 
+        // normalize() deja el texto sin tildes ni mayúsculas, y acceptedNames()
+        // devuelve los nombres válidos (inglés y español) ya normalizados
         const correct = acceptedNames(currentFlag).includes(normalize(answer))
         const result: GuessResult = {
             id: Date.now(),
@@ -109,6 +155,8 @@ const GameProvider = ({ children }: { children: ReactNode }) =>
 
         setLastGuess(result)
 
+        // Si acierta: puntos y bandera nueva. Si falla: se queda en la misma para reintentar.
+        // (setScore(s => s + 10) usa el valor más reciente, no el de este render.)
         if (correct) {
             setScore(s => s + POINTS_HIT)
             setHits(h => h + 1)
@@ -138,17 +186,24 @@ const GameProvider = ({ children }: { children: ReactNode }) =>
         nextFlag(remaining, currentFlag)
     }, [currentFlag, flagList, nextFlag])
 
+    /** Fin de la partida. Lo llama el Timer al llegar a 0 */
     const endGame = useCallback(() => setStatus('finished'), [])
 
+    /** Vuelve a la portada (desde la pantalla de resultados) */
     const goHome = useCallback(() => setStatus('ready'), [])
 
+    /** Añade la puntuación al ranking del modo actual y lo guarda en localStorage */
     const saveScore = useCallback((name: string) =>
     {
+        // Sin nombre se guarda como "Anónimo"
         const entry: LeaderboardEntry = { name: name.trim() || 'Anónimo', score, difficulty }
 
         setLeaderboard(prev =>
         {
-            // Se guardan las mejores de cada modo por separado
+            // El ranking es una sola lista con todos los modos. Se separan las entradas de
+            // este modo, se añade la nueva, se ordenan y se recortan a las 10 mejores, y se
+            // vuelven a juntar con las de los demás modos. (`?? 'medio'`: las entradas
+            // antiguas, sin dificultad, cuentan como medio.)
             const sameMode = [...prev.filter(e => (e.difficulty ?? 'medio') === difficulty), entry]
                 .sort((a, b) => b.score - a.score)
                 .slice(0, MAX_ENTRIES)
@@ -163,6 +218,7 @@ const GameProvider = ({ children }: { children: ReactNode }) =>
         })
     }, [score, difficulty])
 
+    // Todo lo que se comparte con el resto de la app: lo que devuelve useGame()
     return (
         <GameContext.Provider
             value={{

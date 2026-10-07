@@ -25,6 +25,7 @@
   border-top: 1px solid var(--line);
 }
 
+/* Cada fila es una rejilla de 3 columnas: posición | nombre (ocupa el resto) | puntos */
 .ranking__row {
   display: grid;
   grid-template-columns: 2.5ch minmax(0, 1fr) auto;

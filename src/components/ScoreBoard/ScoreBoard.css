@@ -11,6 +11,7 @@
   gap: 10px;
 }
 
+/* Número grande. clamp(mín, ideal, máx): crece con la pantalla pero con límites */
 .score__value {
   font-family: var(--mono);
   font-weight: 500;
